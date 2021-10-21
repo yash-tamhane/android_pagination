@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.apicalling.adapter.UserAdapter;
 import com.example.apicalling.databinding.ActivityMainBinding;
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding activityMainBinding;
     private RecyclerView userRecycleView;
     private UserAdapter userAdapter;
-    private ArrayList<Root> listOfResults = new ArrayList<>();
+    private ArrayList<Data> listOfResults = new ArrayList<>();
     private UserDataViewModel userDataViewModel;
     private int TOTAL_PAGES = 5;
     private int currentPage = 1;
@@ -106,23 +107,26 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<Root>() {
             @Override
             public void onResponse(Call<Root> call, Response<Root> response) {
-                userAdapter.removeLoadingFooter();
-                isLoading = false;
+                if (response.body().getTotal_pages() <= 3) {
+                    userAdapter.removeLoadingFooter();
+                    isLoading = false;
 
-                for (int i = 0; i< response.body().getData().size(); i++) {
-                    listOfResults.add(response.body());
-                    // userDataViewModel.addUserData( i, response);
+                    for (int i = 0; i< response.body().getData().size(); i++) {
+                        userAdapter.add(response.body().getData().get(i));
+                    }
+
+
+                    if (currentPage != TOTAL_PAGES) userAdapter.addLoadingFooter();
+                    else isLastPage = true;
+                } else {
+                    Toast.makeText(MainActivity.this,"no data available",Toast.LENGTH_LONG).show();
                 }
-                //userAdapter.addAll(listOfResults);
 
-                if (currentPage != TOTAL_PAGES) userAdapter.addLoadingFooter();
-                else isLastPage = true;
             }
 
             @Override
             public void onFailure(Call<Root> call, Throwable t) {
                 t.printStackTrace();
-                // TODO: 08/11/16 handle failure
             }
         });
     }
@@ -134,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<Root> call, Response<Root> response) {
                 if (response.isSuccessful()) {
                     for (int i = 0; i< response.body().getData().size(); i++) {
-                        listOfResults.add(response.body());
+                        listOfResults.add(response.body().getData().get(i));
                        // userDataViewModel.addUserData( i, response);
                     }
                     if (currentPage <= TOTAL_PAGES) userAdapter.addLoadingFooter();

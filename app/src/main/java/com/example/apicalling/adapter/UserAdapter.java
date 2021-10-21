@@ -12,22 +12,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.apicalling.R;
+import com.example.apicalling.pojo.Data;
 import com.example.apicalling.pojo.Root;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
 public class UserAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private ArrayList<Root> resultsList;
+    private ArrayList<Data> resultsList;
     private Context context;
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
     private boolean isLoadingAdded = false;
 
-    public UserAdapter(ArrayList<Root> resultsList, Context context) {
+    public UserAdapter(ArrayList<Data> resultsList, Context context) {
         this.resultsList = resultsList;
         this.context = context;
     }
@@ -103,62 +105,46 @@ public class UserAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private void populateItemRows(UserAdapter.ItemViewHolder viewHolder, int position) {
-            Root userList = resultsList.get(position);
-           // Picasso.get().load( userList.getData().get(position).getAvatar()).placeholder(R.drawable.user).into(viewHolder.image);
-            viewHolder.userName.setText(userList.getData().get(position).getFirst_name() + " " + userList.getData().get(position).getLast_name());
-            viewHolder.userEmail.setText(userList.getData().get(position).getEmail());
+            Data userList = resultsList.get(position);
+            Picasso.get().load( userList.getAvatar()).placeholder(R.drawable.user).into(viewHolder.image);
+            viewHolder.userName.setText(userList.getFirst_name() + " " + userList.getLast_name());
+            viewHolder.userEmail.setText(userList.getEmail());
 
         }
 
-    public void add(Root r) {
+    public void add(Data r) {
         resultsList.add(r);
         notifyItemInserted(resultsList.size() - 1);
     }
 
-    public void addAll(List<Root> moveResults) {
-        for (Root result : moveResults) {
-            add(result);
+    public void addAll(List<Data> userData) {
+
+        Iterator<Data> iterator = userData.iterator();
+        while(iterator.hasNext()){
+            Data user = iterator.next();
+            add(user);
         }
-    }
 
-    public void remove(Root r) {
-        int position = resultsList.indexOf(r);
-        if (position > -1) {
-            resultsList.remove(position);
-            notifyItemRemoved(position);
-        }
     }
-
-    public void clear() {
-        isLoadingAdded = false;
-        while (getItemCount() > 0) {
-            remove(getItem(0));
-        }
-    }
-
-    public boolean isEmpty() {
-        return getItemCount() == 0;
-    }
-
 
     public void addLoadingFooter() {
         isLoadingAdded = true;
-        add(new Root());
+        add(new Data());
     }
 
     public void removeLoadingFooter() {
         isLoadingAdded = false;
 
         int position = resultsList.size() - 1;
-        Root result = getItem(position);
+        Data result = getItem(position);
 
-        if (result != null) {
+       if (result != null) {
             resultsList.remove(position);
             notifyItemRemoved(position);
         }
     }
 
-    public Root getItem(int position) {
+    public Data getItem(int position) {
         return resultsList.get(position);
     }
 
